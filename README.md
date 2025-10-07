@@ -5,7 +5,7 @@ The **Edy Theme Generator** is a sleek, a web tool that lets users craft and pre
 ## 🧱 Tech Stack
 
 * **HTML5** — Structure
-* **CSS3 (Glassmorphism)** — Design
+* **CSS3** — Design
 * **JavaScript (Vanilla)** — Interactivity
 
 ## 🚀 Usage
