@@ -3,14 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Edy Theme Generator</title>
+  <title>Edy Theme Generator </title>
+  <meta name="description" content="Create elegant themes for the Edy dashboard. Live preview, export CSS variables or JSON." />
   <style>
+    /*
+      Apple-inspired single-file theme generator
+      - Uses system fonts (-apple-system etc.) to approximate Apple's typography.
+      - One-file: HTML + CSS + JS.
+    */
+
     :root{
-      --radius: 14px;
-      --glass: rgba(255,255,255,0.06);
-      --glass-2: rgba(255,255,255,0.03);
-      --shadow: 0 6px 30px rgba(0,0,0,0.45);
-      /* default theme (dark, like screenshot vibe) */
+      /* theme variables (defaults) */
       --bg: #0b0b0f;
       --fg: #f5f6f8;
       --card: #0f1114;
@@ -18,336 +21,375 @@
       --primary: #3b82f6;
       --border: rgba(255,255,255,0.06);
       --sidebar: #0d0d11;
+
+      /* layout / design tokens */
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --glass: rgba(255,255,255,0.03);
+      --muted: rgba(245,246,248,0.65);
+      --shadow-lg: 0 18px 50px rgba(11,11,15,0.55);
+      --shadow-sm: 0 6px 20px rgba(11,11,15,0.45);
+      --transition: 220ms cubic-bezier(.2,.9,.3,1);
     }
 
-    /* page layout */
+    /* base */
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: linear-gradient(180deg, #060607 0%, var(--bg) 100%);
-      color:var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial;
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
-      padding:40px;
+      color:var(--fg);
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(139,92,246,0.06), transparent 6%),
+        radial-gradient(800px 400px at 95% 90%, rgba(59,130,246,0.04), transparent 8%),
+        linear-gradient(180deg, #060607 0%, var(--bg) 100%);
+      padding:36px;
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:center;
-      min-height:100vh;
       gap:28px;
+      min-height:100vh;
     }
 
-    .container{
-      width:1100px;
-      max-width:95vw;
+    /* page container */
+    .wrap{
+      width:1200px;
+      max-width:96vw;
       display:grid;
       grid-template-columns: 420px 1fr;
-      gap:26px;
+      gap:28px;
       align-items:start;
-      filter:drop-shadow(0 10px 30px rgba(0,0,0,0.6));
+      transform:translateZ(0);
     }
 
-    /* left panel - controls */
+    /* hero area (top of right column) */
+    .hero{
+      grid-column: 1 / -1;
+      display:flex;
+      gap:20px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:6px;
+    }
+    .hero .text{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .kicker{
+      display:inline-block;
+      background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      color:var(--muted);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:13px;
+      border:1px solid rgba(255,255,255,0.02);
+      box-shadow:var(--shadow-sm);
+      backdrop-filter: blur(6px) saturate(120%);
+    }
+    h1{
+      margin:0;
+      font-size:34px;
+      letter-spacing:-0.4px;
+      line-height:1;
+      font-weight:700;
+      color:var(--fg);
+    }
+    p.lead{
+      margin:0;
+      color:var(--muted);
+      max-width:760px;
+    }
+
+    /* left panel */
     .panel{
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius: calc(var(--radius) + 6px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006));
+      border-radius: calc(var(--radius-lg));
       padding:20px;
       border: 1px solid rgba(255,255,255,0.03);
-      backdrop-filter: blur(8px) saturate(120%);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(10px) saturate(120%);
     }
-
-    .panel h1{
-      margin:0 0 12px 0;
-      font-weight:600;
-      letter-spacing:-0.2px;
-      font-size:20px;
+    .panel h2{
+      margin:0 0 8px 0;
+      font-size:16px;
+      font-weight:700;
     }
-    .panel p.lead{
-      margin:0 0 18px 0;
-      color:rgba(245,246,248,0.7);
-      font-size:13px;
-    }
+    .panel p.small{ margin:0 0 14px 0; color:var(--muted); font-size:13px }
 
     .swatch-grid{
       display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
+      grid-template-columns: 1fr;
+      gap:10px;
+      margin-bottom:10px;
     }
 
     .swatch{
       display:flex;
-      gap:10px;
+      gap:12px;
       align-items:center;
-      padding:8px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.03);
+      padding:10px;
+      border-radius:12px;
+      transition:all var(--transition);
+      border:1px solid rgba(255,255,255,0.02);
+      background: linear-gradient(180deg, rgba(255,255,255,0.008), transparent);
     }
+    .swatch:hover{ transform:translateY(-4px); box-shadow:var(--shadow-sm) }
+
     .swatch label{
-      font-size:12px;
-      width:110px;
-      color:rgba(245,246,248,0.9);
-    }
-    .swatch input[type="color"]{
-      width:54px;
-      height:36px;
-      border-radius:8px;
-      border:1px solid rgba(255,255,255,0.06);
-      padding:0;
-      background:transparent;
-      cursor:pointer;
-    }
-    .swatch input[type="text"]{
-      background:transparent;
-      border: none;
-      color:var(--fg);
+      min-width:110px;
       font-size:13px;
-      outline:none;
+      color:var(--fg);
+      opacity:0.95;
+      font-weight:600;
+    }
+    .swatch .controls{
+      display:flex;
+      gap:8px;
+      align-items:center;
       width:100%;
+    }
+    input[type="color"]{
+      width:56px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);cursor:pointer;padding:0;
+      background:transparent;
+    }
+    input[type="text"]{
+      background:transparent;border:none;color:var(--fg);outline:none;font-size:13px;padding:8px;border-radius:8px;
+      flex:1;border:1px solid rgba(255,255,255,0.02);backdrop-filter: blur(3px);
     }
 
     .controls-row{
       display:flex;
       gap:10px;
-      margin-top:16px;
+      margin-top:12px;
       flex-wrap:wrap;
     }
     .btn{
-      appearance:none;
-      border:none;
-      padding:10px 14px;
-      font-size:14px;
-      border-radius:999px;
-      cursor:pointer;
-      box-shadow: 0 6px 18px rgba(11,11,15,0.6);
+      appearance:none;border:none;padding:10px 14px;font-size:14px;border-radius:12px;cursor:pointer;
+      transition:all var(--transition);font-weight:600;
+      box-shadow: 0 8px 20px rgba(11,11,15,0.45);
     }
     .btn.primary{
-      background: linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary) 75%, black 10%));
+      background: linear-gradient(180deg,var(--primary), color-mix(in srgb,var(--primary) 70%, black 8%));
       color:white;
+      box-shadow: 0 14px 30px rgba(59,130,246,0.12);
     }
     .btn.ghost{
-      background: transparent;
-      border:1px solid rgba(255,255,255,0.06);
-      color:var(--fg);
+      background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--fg);
     }
-    .btn.ghost.small{padding:8px 12px; font-size:13px}
+    .btn.ghost:active{ transform:translateY(1px) }
+    .btn.small{ padding:8px 12px;font-size:13px;border-radius:10px }
 
-    .export-box{
-      margin-top:14px;
-      padding:12px;
-      border-radius:10px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));
-      border:1px solid rgba(255,255,255,0.03);
-      font-size:13px;
-      color:rgba(245,246,248,0.85);
+    .export{
+      margin-top:14px;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));
+      border:1px solid rgba(255,255,255,0.02);
     }
-    .export-box textarea{width:100%;height:120px;background:transparent;border:none;color:var(--fg);resize:vertical;outline:none}
+    .export textarea{
+      width:100%;height:110px;background:transparent;border:none;color:var(--fg);resize:vertical;outline:none;font-family:monospace;font-size:13px;
+    }
 
-    /* right panel - preview */
+    /* right panel preview (like a page) */
     .preview{
       background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006));
-      border-radius: calc(var(--radius) + 6px);
-      padding:28px;
+      border-radius: calc(var(--radius-lg));
+      padding:26px;
       border:1px solid rgba(255,255,255,0.03);
-      box-shadow: var(--shadow);
-      min-height:540px;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(8px) saturate(120%);
+      min-height:640px;
       display:flex;
       flex-direction:column;
       gap:18px;
+      overflow:hidden;
     }
 
-    /* preview components — use CSS variables for colors */
-    .edy-app{
-      display:flex;
+    /* fake Edy dashboard inside preview */
+    .edy{
+      display:grid;
+      grid-template-columns: 160px 1fr;
       gap:18px;
       height:100%;
     }
-    .sidebar{
-      width:140px;
-      border-radius:12px;
-      padding:14px;
-      background: linear-gradient(180deg, var(--sidebar), color-mix(in srgb, var(--sidebar) 60%, black 8%));
+
+    /* sidebar */
+    .edy .sidebar{
+      border-radius:12px;padding:14px;background:linear-gradient(180deg,var(--sidebar), color-mix(in srgb,var(--sidebar) 60%, black 8%));
       border:1px solid var(--border);
-      color:var(--fg);
-      flex-shrink:0;
+      color:var(--fg);display:flex;flex-direction:column;gap:12px;
     }
-    .sidebar .item{
-      padding:10px;
-      margin-bottom:8px;
-      border-radius:8px;
-      font-size:13px;
-      background:transparent;
+    .edy .logo{
+      height:44px;width:44px;border-radius:10px;background:linear-gradient(180deg,var(--primary), color-mix(in srgb,var(--primary) 60%, black 8%));
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:18px;
+      box-shadow:0 8px 30px rgba(59,130,246,0.08);
     }
+    .nav-item{
+      padding:10px;border-radius:8px;display:flex;align-items:center;gap:10px;font-weight:600;color:var(--fg);opacity:0.95;
+    }
+    .nav-item.muted{ opacity:0.6;font-weight:500;font-size:13px }
+
     .content{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
+      display:flex;flex-direction:column;gap:12px;
     }
-
     .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:10px 14px;
-      border-radius:12px;
-      background:linear-gradient(180deg, var(--card), color-mix(in srgb, var(--card) 70%, black 6%));
+      display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:12px;
+      background:linear-gradient(180deg,var(--card), color-mix(in srgb,var(--card) 80%, black 8%));
       border:1px solid var(--border);
-      color:var(--fg);
     }
-    .topbar .brand{
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .logo{
-      width:44px;height:44px;border-radius:10px;background:linear-gradient(180deg,var(--primary), color-mix(in srgb,var(--primary) 70%, black 12%));
-      display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:18px;
-    }
-    .topbar .actions{display:flex;gap:10px;align-items:center}
+    .topbar .meta{ color:var(--muted); font-size:13px }
 
-    .hero{
-      border-radius:14px;
-      padding:22px;
-      background: linear-gradient(180deg, color-mix(in srgb,var(--card) 95%, var(--bg) 5%), var(--card));
+    .hero-card{
+      display:flex;justify-content:space-between;align-items:center;padding:22px;border-radius:16px;
+      background:linear-gradient(180deg, color-mix(in srgb,var(--card) 95%, var(--bg) 5%), var(--card));
       border:1px solid var(--border);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:20px;
     }
-    .hero .copy{max-width:70%}
-    .hero h2{margin:0;font-size:20px}
-    .hero p{margin:6px 0 0 0;color:rgba(245,246,248,0.8);font-size:13px}
+    .hero-card h2{ margin:0;font-size:20px }
+    .hero-card p{ margin:6px 0 0 0;color:var(--muted) }
 
-    .cards{
+    .grid-cards{
       display:grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3,1fr);
       gap:12px;
+      margin-top:6px;
     }
     .card{
-      padding:14px;
-      border-radius:12px;
-      background:linear-gradient(180deg,var(--card), color-mix(in srgb,var(--card) 85%, black 6%));
+      padding:14px;border-radius:12px;background:linear-gradient(180deg,var(--card), color-mix(in srgb,var(--card) 85%, black 6%));
       border:1px solid var(--border);
-      color:var(--fg);
-      min-height:86px;
     }
-    .card .title{font-size:13px;margin-bottom:8px}
-    .card .value{font-weight:700;font-size:18px}
+    .card .label{ color:var(--muted); font-size:13px }
+    .card .big{ margin-top:6px;font-weight:800;font-size:18px }
 
     .accent-btn{
-      background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 70%, black 10%));
-      padding:10px 14px;border-radius:999px;color:white;border:none;font-weight:600;cursor:pointer;
-      box-shadow:0 8px 22px rgba(0,0,0,0.45);
+      padding:10px 16px;border-radius:999px;border:none;font-weight:700;
+      background:linear-gradient(180deg,var(--accent), color-mix(in srgb,var(--accent) 70%, black 8%));
+      color:white;cursor:pointer;box-shadow:0 10px 30px rgba(139,92,246,0.12);
     }
 
     /* small screens */
-    @media (max-width:980px){
-      .container{grid-template-columns:1fr; padding:0 16px}
-      .sidebar{display:none}
-      .cards{grid-template-columns:repeat(2,1fr)}
+    @media (max-width:1080px){
+      .wrap{grid-template-columns:1fr; gap:18px}
+      .hero{flex-direction:column;align-items:flex-start}
+      .edy{grid-template-columns:1fr; }
+      .edy .sidebar{order:2}
+      .preview{min-height:560px}
     }
   </style>
 </head>
 <body>
-  <div class="container" role="main">
-    <div class="panel" aria-labelledby="title">
-      <h1 id="title">Edy Theme Generator</h1>
-      <p class="lead">Design a refined theme and export CSS variables or JSON. Live preview updates as you pick colors.</p>
-
-      <div class="swatch-grid" id="pickers">
-        <!-- swatches inserted by JS -->
+  <div class="wrap" role="main">
+    <!-- HERO (spans columns) -->
+    <div class="hero" style="grid-column:1/-1">
+      <div class="text">
+        <div class="kicker">Edy • Theme Studio</div>
+        <h1>Design beautiful themes for Edy</h1>
+        <p class="lead">Create refined,color palettes and export them as CSS variables or JSON. Live preview updates across a small Edy dashboard demo so you can see changes instantly.</p>
       </div>
 
-      <div class="controls-row">
-        <button class="btn primary" id="randomBtn" title="Randomize theme">Randomize</button>
-        <button class="btn ghost small" id="resetBtn" title="Reset to defaults">Reset</button>
-        <button class="btn ghost small" id="importBtn" title="Import JSON theme">Import JSON</button>
-        <input id="fileInput" type="file" accept="application/json" style="display:none" />
-      </div>
-
-      <div class="export-box" aria-live="polite">
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-          <button class="btn primary" id="copyCss">Copy CSS</button>
-          <button class="btn ghost small" id="copyJson">Copy JSON</button>
-          <button class="btn ghost small" id="downloadJson">Download JSON</button>
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end">
+        <div style="font-size:13px;color:var(--muted);text-align:right">Made for Edy — Apple-like aesthetic</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost small" id="resetAll">Reset</button>
+          <button class="btn primary" id="randomize">Inspire</button>
         </div>
-        <label style="font-size:12px;color:rgba(245,246,248,0.7);">Generated CSS variables</label>
-        <textarea id="cssOutput" readonly></textarea>
       </div>
     </div>
 
-    <div class="preview" aria-label="Live preview">
-      <div class="edy-app" id="edyPreview">
-        <aside class="sidebar" aria-hidden="false">
-          <div style="font-weight:700;margin-bottom:10px">Edy</div>
-          <div class="item">Home</div>
-          <div class="item">Projects</div>
-          <div class="item">Analytics</div>
-          <div class="item">Settings</div>
-        </aside>
+    <!-- LEFT: Controls -->
+    <aside class="panel" aria-labelledby="controls-title">
+      <h2 id="controls-title">Theme Controls</h2>
+      <p class="small">Pick main variables. You can export the CSS variables or a JSON theme object for programmatic use.</p>
 
-        <section class="content" aria-live="polite">
+      <div class="swatch-grid" id="swatches"></div>
+
+      <div class="controls-row">
+        <button class="btn primary" id="copyCssBtn">Copy CSS</button>
+        <button class="btn ghost small" id="copyJsonBtn">Copy JSON</button>
+        <button class="btn ghost small" id="downloadBtn">Download JSON</button>
+        <button class="btn ghost small" id="openImport">Import</button>
+        <input id="fileInp" type="file" accept="application/json" style="display:none" />
+      </div>
+
+      <div class="export" style="margin-top:12px">
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <div style="flex:1">
+            <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Generated CSS</label>
+            <textarea id="cssArea" readonly></textarea>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Preview -->
+    <section class="preview" aria-label="Live preview example">
+      <div class="edy" id="edyPreview">
+        <div class="sidebar" role="navigation" aria-label="Sidebar">
+          <div style="display:flex;gap:10px;align-items:center">
+            <div class="logo">E</div>
+            <div style="font-weight:800;font-size:16px">Edy</div>
+          </div>
+
+          <div style="margin-top:8px">
+            <div class="nav-item">Home</div>
+            <div class="nav-item">Notes</div>
+            <div class="nav-item">Timers</div>
+            <div class="nav-item muted">Settings</div>
+          </div>
+
+          <div style="margin-top:auto;color:var(--muted);font-size:13px">edy.lynnux.xyz</div>
+        </div>
+
+        <div class="content">
           <div class="topbar">
-            <div class="brand">
-              <div class="logo">E</div>
-              <div>
-                <div style="font-weight:700">Edy Dashboard</div>
-                <div style="font-size:12px;color:rgba(245,246,248,0.7)">Overview & insights</div>
-              </div>
+            <div>
+              <div style="font-weight:800;font-size:16px">Tutorials</div>
+              <div class="meta">Custom Theme Customization</div>
             </div>
-            <div class="actions">
-              <button class="btn ghost small">Export</button>
-              <button class="btn ghost small">Share</button>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button class="btn small ghost">Export</button>
               <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(180deg,var(--card), var(--bg));border:1px solid var(--border)"></div>
             </div>
           </div>
 
-          <div class="hero">
-            <div class="copy">
-              <h2>Elegant theme previews, instantly.</h2>
-              <p>Change colors to see how Edy would look — cards, buttons, and navigation reflect your palette.</p>
+          <div class="hero-card">
+            <div>
+              <h2>Preview Edy — instant</h2>
+              <p>Live examples of cards, buttons, and navigation reflect your chosen palette.</p>
             </div>
-            <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end;">
+            <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end">
               <button class="accent-btn">Primary Action</button>
-              <button class="btn ghost" style="padding:8px 12px">Secondary</button>
+              <button class="btn ghost small">Secondary</button>
             </div>
           </div>
 
-          <div class="cards" style="margin-top:6px">
+          <div class="grid-cards">
             <div class="card">
-              <div class="title">Subscribers</div>
-              <div class="value">1.2M</div>
+              <div class="label">Subscribers</div>
+              <div class="big">1.2M</div>
             </div>
             <div class="card">
-              <div class="title">Watch time</div>
-              <div class="value">34.7k hrs</div>
+              <div class="label">Watch time</div>
+              <div class="big">34.7k hrs</div>
             </div>
             <div class="card">
-              <div class="title">Revenue</div>
-              <div class="value">$12.4k</div>
+              <div class="label">Revenue</div>
+              <div class="big">$12.4k</div>
             </div>
           </div>
 
-          <div style="display:flex;gap:12px;align-items:center;margin-top:auto">
-            <div style="flex:1">
-              <div style="font-size:13px;color:rgba(245,246,248,0.75)">Theme preview</div>
-              <div style="font-size:12px;color:rgba(245,246,248,0.55)">Use the generated CSS variables in your Edy app to apply the theme globally.</div>
-            </div>
-            <div style="font-size:12px;color:rgba(245,246,248,0.6)">Preview updated live</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto">
+            <div style="color:var(--muted);font-size:13px">Tip: Press <strong>Ctrl/Cmd + I</strong> to paste a theme JSON quickly.</div>
+            <div style="color:var(--muted);font-size:13px">Preview updated live</div>
           </div>
-        </section>
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 
   <script>
     (function(){
-      // theme keys and defaults
-      const defaultTheme = {
+      // keys and defaults
+      const defaults = {
         background: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0b0b0f',
         foreground: getComputedStyle(document.documentElement).getPropertyValue('--fg').trim() || '#f5f6f8',
         card: getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#0f1114',
@@ -357,7 +399,7 @@
         sidebar: getComputedStyle(document.documentElement).getPropertyValue('--sidebar').trim() || '#0d0d11'
       };
 
-      const themeKeys = [
+      const keys = [
         {key:'background', label:'Background'},
         {key:'foreground', label:'Foreground'},
         {key:'card', label:'Card'},
@@ -367,53 +409,35 @@
         {key:'sidebar', label:'Sidebar'}
       ];
 
-      // create swatches
-      const pickers = document.getElementById('pickers');
-      themeKeys.forEach(t=>{
+      // build UI swatches
+      const swatches = document.getElementById('swatches');
+      keys.forEach(k=>{
         const div = document.createElement('div');
         div.className = 'swatch';
-        div.innerHTML = `<label for="${t.key}">${t.label}</label>
-          <input type="color" id="${t.key}" data-key="${t.key}" />
-          <input type="text" id="${t.key}-hex" data-key="${t.key}" aria-label="${t.label} hex" />`;
-        pickers.appendChild(div);
+        div.innerHTML = `
+          <label for="${k.key}">${k.label}</label>
+          <div class="controls">
+            <input type="color" id="${k.key}" data-key="${k.key}" />
+            <input type="text" id="${k.key}-txt" data-key="${k.key}" placeholder="#hex or rgba()" />
+          </div>
+        `;
+        swatches.appendChild(div);
       });
 
-      // load values into inputs
-      function setInputsFromTheme(theme){
-        themeKeys.forEach(t=>{
-          const colorInput = document.querySelector(`#${t.key}`);
-          const textInput = document.querySelector(`#${t.key}-hex`);
-          let v = theme[t.key] || defaultTheme[t.key];
-          // attempt to normalize rgba -> hex fallback
-          if(v.startsWith('rgba') || v.startsWith('rgb')){
-            // simple fallback: keep as-is in text field; color input requires hex -> use default
-            try {
-              // convert rgb/rgba to hex
-              const nums = v.replace(/[rgba()]/g,'').split(',').map(s=>s.trim());
-              const r = parseInt(nums[0]), g = parseInt(nums[1]), b = parseInt(nums[2]);
-              v = '#'+ [r,g,b].map(n=>n.toString(16).padStart(2,'0')).join('');
-            } catch(e){}
-          }
-          colorInput.value = toHex(v);
-          textInput.value = v;
-        });
-      }
-
+      // helper to convert colors
       function toHex(v){
         if(!v) return '#000000';
         v = v.trim();
-        if(v.startsWith('#')) {
-          // support 3-digit short -> convert
+        if(v.startsWith('#')){
           if(v.length===4) return '#'+v.slice(1).split('').map(s=>s+s).join('');
           return v;
         }
-        // rgb(...) or rgba(...)
         if(v.startsWith('rgb')){
           const nums = v.replace(/[rgba()]/g,'').split(',').map(s=>s.trim());
           const r = parseInt(nums[0]), g = parseInt(nums[1]), b = parseInt(nums[2]);
           return '#'+ [r,g,b].map(n=>n.toString(16).padStart(2,'0')).join('');
         }
-        // fallback: try to compute computed color
+        // named colors -> compute
         const tmp = document.createElement('div');
         tmp.style.color = v;
         document.body.appendChild(tmp);
@@ -422,7 +446,7 @@
         return toHex(comp);
       }
 
-      // apply theme to :root variables
+      // apply theme to :root
       function applyTheme(theme){
         const root = document.documentElement;
         if(theme.background) root.style.setProperty('--bg', theme.background);
@@ -432,11 +456,10 @@
         if(theme.primary) root.style.setProperty('--primary', theme.primary);
         if(theme.border) root.style.setProperty('--border', theme.border);
         if(theme.sidebar) root.style.setProperty('--sidebar', theme.sidebar);
-        updateCssOutput(theme);
+        updateCssArea(theme);
       }
 
-      // build CSS var output
-      function buildCssText(theme){
+      function buildCss(theme){
         return `:root {
   --bg: ${theme.background};
   --fg: ${theme.foreground};
@@ -448,152 +471,176 @@
 }`;
       }
 
-      function updateCssOutput(theme){
-        const cssOutput = document.getElementById('cssOutput');
-        cssOutput.value = buildCssText(theme);
+      function updateCssArea(theme){
+        document.getElementById('cssArea').value = buildCss(theme);
       }
 
-      // get current theme from inputs
-      function readThemeFromInputs(){
+      // set inputs from theme
+      function setInputs(theme){
+        keys.forEach(k=>{
+          const color = document.getElementById(k.key);
+          const txt = document.getElementById(k.key + '-txt');
+          let v = theme[k.key] || defaults[k.key];
+          // if rgba, try to convert to hex for color input
+          let colorVal = v;
+          try { colorVal = toHex(v); } catch(e){}
+          color.value = colorVal;
+          txt.value = v;
+        });
+      }
+
+      // read theme from inputs
+      function readTheme(){
         const t = {};
-        themeKeys.forEach(k=>{
-          const textInput = document.querySelector(`#${k.key}-hex`);
-          const colorInput = document.querySelector(`#${k.key}`);
-          const val = (textInput.value && textInput.value.trim()) || (colorInput.value && colorInput.value.trim()) || defaultTheme[k.key];
+        keys.forEach(k=>{
+          const txt = document.getElementById(k.key + '-txt');
+          const color = document.getElementById(k.key);
+          const val = (txt.value && txt.value.trim()) || color.value || defaults[k.key];
           t[k.key] = val;
         });
         return t;
       }
 
-      // sync color input <-> text input
-      themeKeys.forEach(k=>{
-        const color = document.querySelector(`#${k.key}`);
-        const text = document.querySelector(`#${k.key}-hex`);
-        color.addEventListener('input', ()=>{
-          text.value = color.value;
-          applyTheme(readThemeFromInputs());
+      // sync events
+      keys.forEach(k=>{
+        const colorEl = document.getElementById(k.key);
+        const txt = document.getElementById(k.key + '-txt');
+
+        colorEl.addEventListener('input', ()=>{
+          txt.value = colorEl.value;
+          applyTheme(readTheme());
         });
-        text.addEventListener('change', ()=>{
-          // try normalizing; if it's a color name or hex it will convert
-          try{
-            color.value = toHex(text.value);
-          }catch(e){}
-          applyTheme(readThemeFromInputs());
+
+        txt.addEventListener('change', ()=>{
+          // try to normalize into color input
+          try {
+            colorEl.value = toHex(txt.value);
+          } catch(e){}
+          applyTheme(readTheme());
         });
       });
 
-      // utility: generate random pleasant colors (soft saturation)
-      function randomColor(seed){
-        const r = Math.floor(100 + Math.random()*155);
-        const g = Math.floor(70 + Math.random()*140);
-        const b = Math.floor(70 + Math.random()*160);
-        return '#'+ [r,g,b].map(n=>n.toString(16).padStart(2,'0')).join('');
+      // random / reset
+      function randPleasant(){
+        // tuned random for more pleasant colors
+        const h = Math.floor(Math.random()*360);
+        const s = 60 + Math.floor(Math.random()*20); // 60-80
+        const l = 45 + Math.floor(Math.random()*10); // 45-55
+        // hsl to hex
+        const hex = hslToHex(h, s, l);
+        return hex;
+      }
+      function hslToHex(h, s, l){
+        s /= 100; l /= 100;
+        const k = n => (n + h/30) % 12;
+        const a = s * Math.min(l, 1 - l);
+        const f = n => Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))));
+        return '#' + [f(0), f(8), f(4)].map(x => x.toString(16).padStart(2,'0')).join('');
       }
 
-      // randomize theme
-      document.getElementById('randomBtn').addEventListener('click', ()=>{
-        const t = {
+      document.getElementById('randomize').addEventListener('click', ()=>{
+        const theme = {
           background: '#0b0b0f',
           foreground: '#f7f7f9',
           card: '#0f1114',
-          accent: randomColor(),
-          primary: randomColor(),
+          accent: randPleasant(),
+          primary: randPleasant(),
           border: 'rgba(255,255,255,0.06)',
           sidebar: '#0d0d11'
         };
-        setInputsFromTheme(t);
-        applyTheme(t);
+        setInputs(theme);
+        applyTheme(theme);
       });
 
-      // reset
-      document.getElementById('resetBtn').addEventListener('click', ()=>{
-        setInputsFromTheme(defaultTheme);
-        applyTheme(defaultTheme);
+      document.getElementById('resetAll').addEventListener('click', ()=>{
+        setInputs(defaults);
+        applyTheme(defaults);
       });
 
-      // copy CSS
-      document.getElementById('copyCss').addEventListener('click', async ()=>{
-        const theme = readThemeFromInputs();
-        const css = buildCssText(theme);
-        await navigator.clipboard.writeText(css);
-        flashButton('copyCss','Copied');
-      });
-
-      // copy JSON
-      document.getElementById('copyJson').addEventListener('click', async ()=>{
-        const theme = readThemeFromInputs();
-        const json = JSON.stringify(theme, null, 2);
-        await navigator.clipboard.writeText(json);
-        flashButton('copyJson','Copied');
-      });
-
-      // download JSON
-      document.getElementById('downloadJson').addEventListener('click', ()=>{
-        const theme = readThemeFromInputs();
-        const blob = new Blob([JSON.stringify(theme,null,2)], {type:'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'edy-theme.json';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      });
-
-      // import JSON via button -> file input
-      const fileInput = document.getElementById('fileInput');
-      document.getElementById('importBtn').addEventListener('click', ()=> fileInput.click());
-      fileInput.addEventListener('change', (e)=>{
-        const f = e.target.files[0];
-        if(!f) return;
-        const reader = new FileReader();
-        reader.onload = ()=>{
-          try {
-            const obj = JSON.parse(reader.result);
-            setInputsFromTheme(obj);
-            applyTheme(obj);
-          } catch(err){
-            alert('Invalid theme JSON');
-          }
-        };
-        reader.readAsText(f);
-        fileInput.value = '';
-      });
-
-      // simple button flash helper
-      function flashButton(id, text){
-        const btn = document.getElementById(id);
-        const orig = btn.innerText;
-        btn.innerText = text;
-        setTimeout(()=> btn.innerText = orig, 1200);
+      // copy css/json/download
+      async function copyText(text){
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta);
+          ta.select(); document.execCommand('copy'); ta.remove();
+        }
       }
 
-      // initialize
-      setInputsFromTheme(defaultTheme);
-      applyTheme(defaultTheme);
-
-      // update CSS output on any change
-      Array.from(document.querySelectorAll('input')).forEach(inp=>{
-        inp.addEventListener('input', ()=> {
-          updateCssOutput(readThemeFromInputs());
-        });
+      document.getElementById('copyCssBtn').addEventListener('click', async ()=>{
+        const t = readTheme();
+        await copyText(buildCss(t));
+        flash('Copied CSS');
       });
 
-      // allow direct JSON paste via keyboard (Ctrl+I)
-      window.addEventListener('keydown', (e)=>{
-        if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='i'){
+      document.getElementById('copyJsonBtn').addEventListener('click', async ()=>{
+        const t = readTheme();
+        await copyText(JSON.stringify(t, null, 2));
+        flash('Copied JSON');
+      });
+
+      document.getElementById('downloadBtn').addEventListener('click', ()=>{
+        const t = readTheme();
+        const blob = new Blob([JSON.stringify(t, null, 2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'edy-theme.json';
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      });
+
+      // import
+      const fileInp = document.getElementById('fileInp');
+      document.getElementById('openImport').addEventListener('click', ()=> fileInp.click());
+      fileInp.addEventListener('change', (e)=>{
+        const f = e.target.files[0];
+        if(!f) return;
+        const r = new FileReader();
+        r.onload = ()=> {
+          try {
+            const obj = JSON.parse(r.result);
+            setInputs(obj);
+            applyTheme(obj);
+            flash('Theme imported');
+          } catch(e){ alert('Invalid JSON') }
+        };
+        r.readAsText(f);
+        fileInp.value = '';
+      });
+
+      // quick paste via Ctrl/Cmd + I
+      window.addEventListener('keydown', (ev)=>{
+        if((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'i'){
           const text = prompt('Paste theme JSON here:');
           if(!text) return;
-          try{
+          try {
             const obj = JSON.parse(text);
-            setInputsFromTheme(obj);
+            setInputs(obj);
             applyTheme(obj);
-          }catch(err){
-            alert('Invalid JSON');
-          }
+            flash('Theme applied');
+          } catch(e){ alert('Invalid JSON') }
         }
       });
 
+      function flash(msg){
+        const el = document.createElement('div');
+        el.textContent = msg;
+        Object.assign(el.style, {
+          position:'fixed', right:'24px', bottom:'24px', background:'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02))',
+          color: 'var(--fg)', padding:'10px 14px', borderRadius:'12px', border:'1px solid rgba(255,255,255,0.04)', boxShadow:'var(--shadow-sm)', zIndex:9999, fontWeight:700
+        });
+        document.body.appendChild(el);
+        setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateY(10px)'; }, 1000);
+        setTimeout(()=> el.remove(), 1700);
+      }
+
+      // initialize with defaults
+      setInputs(defaults);
+      applyTheme(defaults);
+
+      // keep CSS area updated on manual input
+      document.querySelectorAll('input').forEach(i=>{
+        i.addEventListener('input', ()=> updateCssArea(readTheme()));
+      });
     })();
   </script>
 </body>
