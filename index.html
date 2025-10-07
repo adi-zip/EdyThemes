@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Edy Theme Generator</title>
+  <style>
+    :root{
+      --radius: 14px;
+      --glass: rgba(255,255,255,0.06);
+      --glass-2: rgba(255,255,255,0.03);
+      --shadow: 0 6px 30px rgba(0,0,0,0.45);
+      /* default theme (dark, like screenshot vibe) */
+      --bg: #0b0b0f;
+      --fg: #f5f6f8;
+      --card: #0f1114;
+      --accent: #8b5cf6;
+      --primary: #3b82f6;
+      --border: rgba(255,255,255,0.06);
+      --sidebar: #0d0d11;
+    }
+
+    /* page layout */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, #060607 0%, var(--bg) 100%);
+      color:var(--fg);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:40px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      gap:28px;
+    }
+
+    .container{
+      width:1100px;
+      max-width:95vw;
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:26px;
+      align-items:start;
+      filter:drop-shadow(0 10px 30px rgba(0,0,0,0.6));
+    }
+
+    /* left panel - controls */
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius: calc(var(--radius) + 6px);
+      padding:20px;
+      border: 1px solid rgba(255,255,255,0.03);
+      backdrop-filter: blur(8px) saturate(120%);
+      box-shadow: var(--shadow);
+    }
+
+    .panel h1{
+      margin:0 0 12px 0;
+      font-weight:600;
+      letter-spacing:-0.2px;
+      font-size:20px;
+    }
+    .panel p.lead{
+      margin:0 0 18px 0;
+      color:rgba(245,246,248,0.7);
+      font-size:13px;
+    }
+
+    .swatch-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+
+    .swatch{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .swatch label{
+      font-size:12px;
+      width:110px;
+      color:rgba(245,246,248,0.9);
+    }
+    .swatch input[type="color"]{
+      width:54px;
+      height:36px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.06);
+      padding:0;
+      background:transparent;
+      cursor:pointer;
+    }
+    .swatch input[type="text"]{
+      background:transparent;
+      border: none;
+      color:var(--fg);
+      font-size:13px;
+      outline:none;
+      width:100%;
+    }
+
+    .controls-row{
+      display:flex;
+      gap:10px;
+      margin-top:16px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      appearance:none;
+      border:none;
+      padding:10px 14px;
+      font-size:14px;
+      border-radius:999px;
+      cursor:pointer;
+      box-shadow: 0 6px 18px rgba(11,11,15,0.6);
+    }
+    .btn.primary{
+      background: linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary) 75%, black 10%));
+      color:white;
+    }
+    .btn.ghost{
+      background: transparent;
+      border:1px solid rgba(255,255,255,0.06);
+      color:var(--fg);
+    }
+    .btn.ghost.small{padding:8px 12px; font-size:13px}
+
+    .export-box{
+      margin-top:14px;
+      padding:12px;
+      border-radius:10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));
+      border:1px solid rgba(255,255,255,0.03);
+      font-size:13px;
+      color:rgba(245,246,248,0.85);
+    }
+    .export-box textarea{width:100%;height:120px;background:transparent;border:none;color:var(--fg);resize:vertical;outline:none}
+
+    /* right panel - preview */
+    .preview{
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006));
+      border-radius: calc(var(--radius) + 6px);
+      padding:28px;
+      border:1px solid rgba(255,255,255,0.03);
+      box-shadow: var(--shadow);
+      min-height:540px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    /* preview components — use CSS variables for colors */
+    .edy-app{
+      display:flex;
+      gap:18px;
+      height:100%;
+    }
+    .sidebar{
+      width:140px;
+      border-radius:12px;
+      padding:14px;
+      background: linear-gradient(180deg, var(--sidebar), color-mix(in srgb, var(--sidebar) 60%, black 8%));
+      border:1px solid var(--border);
+      color:var(--fg);
+      flex-shrink:0;
+    }
+    .sidebar .item{
+      padding:10px;
+      margin-bottom:8px;
+      border-radius:8px;
+      font-size:13px;
+      background:transparent;
+    }
+    .content{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 14px;
+      border-radius:12px;
+      background:linear-gradient(180deg, var(--card), color-mix(in srgb, var(--card) 70%, black 6%));
+      border:1px solid var(--border);
+      color:var(--fg);
+    }
+    .topbar .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo{
+      width:44px;height:44px;border-radius:10px;background:linear-gradient(180deg,var(--primary), color-mix(in srgb,var(--primary) 70%, black 12%));
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:18px;
+    }
+    .topbar .actions{display:flex;gap:10px;align-items:center}
+
+    .hero{
+      border-radius:14px;
+      padding:22px;
+      background: linear-gradient(180deg, color-mix(in srgb,var(--card) 95%, var(--bg) 5%), var(--card));
+      border:1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:20px;
+    }
+    .hero .copy{max-width:70%}
+    .hero h2{margin:0;font-size:20px}
+    .hero p{margin:6px 0 0 0;color:rgba(245,246,248,0.8);font-size:13px}
+
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    .card{
+      padding:14px;
+      border-radius:12px;
+      background:linear-gradient(180deg,var(--card), color-mix(in srgb,var(--card) 85%, black 6%));
+      border:1px solid var(--border);
+      color:var(--fg);
+      min-height:86px;
+    }
+    .card .title{font-size:13px;margin-bottom:8px}
+    .card .value{font-weight:700;font-size:18px}
+
+    .accent-btn{
+      background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 70%, black 10%));
+      padding:10px 14px;border-radius:999px;color:white;border:none;font-weight:600;cursor:pointer;
+      box-shadow:0 8px 22px rgba(0,0,0,0.45);
+    }
+
+    /* small screens */
+    @media (max-width:980px){
+      .container{grid-template-columns:1fr; padding:0 16px}
+      .sidebar{display:none}
+      .cards{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <div class="panel" aria-labelledby="title">
+      <h1 id="title">Edy Theme Generator</h1>
+      <p class="lead">Design a refined theme and export CSS variables or JSON. Live preview updates as you pick colors.</p>
+
+      <div class="swatch-grid" id="pickers">
+        <!-- swatches inserted by JS -->
+      </div>
+
+      <div class="controls-row">
+        <button class="btn primary" id="randomBtn" title="Randomize theme">Randomize</button>
+        <button class="btn ghost small" id="resetBtn" title="Reset to defaults">Reset</button>
+        <button class="btn ghost small" id="importBtn" title="Import JSON theme">Import JSON</button>
+        <input id="fileInput" type="file" accept="application/json" style="display:none" />
+      </div>
+
+      <div class="export-box" aria-live="polite">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+          <button class="btn primary" id="copyCss">Copy CSS</button>
+          <button class="btn ghost small" id="copyJson">Copy JSON</button>
+          <button class="btn ghost small" id="downloadJson">Download JSON</button>
+        </div>
+        <label style="font-size:12px;color:rgba(245,246,248,0.7);">Generated CSS variables</label>
+        <textarea id="cssOutput" readonly></textarea>
+      </div>
+    </div>
+
+    <div class="preview" aria-label="Live preview">
+      <div class="edy-app" id="edyPreview">
+        <aside class="sidebar" aria-hidden="false">
+          <div style="font-weight:700;margin-bottom:10px">Edy</div>
+          <div class="item">Home</div>
+          <div class="item">Projects</div>
+          <div class="item">Analytics</div>
+          <div class="item">Settings</div>
+        </aside>
+
+        <section class="content" aria-live="polite">
+          <div class="topbar">
+            <div class="brand">
+              <div class="logo">E</div>
+              <div>
+                <div style="font-weight:700">Edy Dashboard</div>
+                <div style="font-size:12px;color:rgba(245,246,248,0.7)">Overview & insights</div>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="btn ghost small">Export</button>
+              <button class="btn ghost small">Share</button>
+              <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(180deg,var(--card), var(--bg));border:1px solid var(--border)"></div>
+            </div>
+          </div>
+
+          <div class="hero">
+            <div class="copy">
+              <h2>Elegant theme previews, instantly.</h2>
+              <p>Change colors to see how Edy would look — cards, buttons, and navigation reflect your palette.</p>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end;">
+              <button class="accent-btn">Primary Action</button>
+              <button class="btn ghost" style="padding:8px 12px">Secondary</button>
+            </div>
+          </div>
+
+          <div class="cards" style="margin-top:6px">
+            <div class="card">
+              <div class="title">Subscribers</div>
+              <div class="value">1.2M</div>
+            </div>
+            <div class="card">
+              <div class="title">Watch time</div>
+              <div class="value">34.7k hrs</div>
+            </div>
+            <div class="card">
+              <div class="title">Revenue</div>
+              <div class="value">$12.4k</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:center;margin-top:auto">
+            <div style="flex:1">
+              <div style="font-size:13px;color:rgba(245,246,248,0.75)">Theme preview</div>
+              <div style="font-size:12px;color:rgba(245,246,248,0.55)">Use the generated CSS variables in your Edy app to apply the theme globally.</div>
+            </div>
+            <div style="font-size:12px;color:rgba(245,246,248,0.6)">Preview updated live</div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // theme keys and defaults
+      const defaultTheme = {
+        background: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0b0b0f',
+        foreground: getComputedStyle(document.documentElement).getPropertyValue('--fg').trim() || '#f5f6f8',
+        card: getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#0f1114',
+        accent: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8b5cf6',
+        primary: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#3b82f6',
+        border: getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || 'rgba(255,255,255,0.06)',
+        sidebar: getComputedStyle(document.documentElement).getPropertyValue('--sidebar').trim() || '#0d0d11'
+      };
+
+      const themeKeys = [
+        {key:'background', label:'Background'},
+        {key:'foreground', label:'Foreground'},
+        {key:'card', label:'Card'},
+        {key:'accent', label:'Accent'},
+        {key:'primary', label:'Primary'},
+        {key:'border', label:'Border'},
+        {key:'sidebar', label:'Sidebar'}
+      ];
+
+      // create swatches
+      const pickers = document.getElementById('pickers');
+      themeKeys.forEach(t=>{
+        const div = document.createElement('div');
+        div.className = 'swatch';
+        div.innerHTML = `<label for="${t.key}">${t.label}</label>
+          <input type="color" id="${t.key}" data-key="${t.key}" />
+          <input type="text" id="${t.key}-hex" data-key="${t.key}" aria-label="${t.label} hex" />`;
+        pickers.appendChild(div);
+      });
+
+      // load values into inputs
+      function setInputsFromTheme(theme){
+        themeKeys.forEach(t=>{
+          const colorInput = document.querySelector(`#${t.key}`);
+          const textInput = document.querySelector(`#${t.key}-hex`);
+          let v = theme[t.key] || defaultTheme[t.key];
+          // attempt to normalize rgba -> hex fallback
+          if(v.startsWith('rgba') || v.startsWith('rgb')){
+            // simple fallback: keep as-is in text field; color input requires hex -> use default
+            try {
+              // convert rgb/rgba to hex
+              const nums = v.replace(/[rgba()]/g,'').split(',').map(s=>s.trim());
+              const r = parseInt(nums[0]), g = parseInt(nums[1]), b = parseInt(nums[2]);
+              v = '#'+ [r,g,b].map(n=>n.toString(16).padStart(2,'0')).join('');
+            } catch(e){}
+          }
+          colorInput.value = toHex(v);
+          textInput.value = v;
+        });
+      }
+
+      function toHex(v){
+        if(!v) return '#000000';
+        v = v.trim();
+        if(v.startsWith('#')) {
+          // support 3-digit short -> convert
+          if(v.length===4) return '#'+v.slice(1).split('').map(s=>s+s).join('');
+          return v;
+        }
+        // rgb(...) or rgba(...)
+        if(v.startsWith('rgb')){
+          const nums = v.replace(/[rgba()]/g,'').split(',').map(s=>s.trim());
+          const r = parseInt(nums[0]), g = parseInt(nums[1]), b = parseInt(nums[2]);
+          return '#'+ [r,g,b].map(n=>n.toString(16).padStart(2,'0')).join('');
+        }
+        // fallback: try to compute computed color
+        const tmp = document.createElement('div');
+        tmp.style.color = v;
+        document.body.appendChild(tmp);
+        const comp = getComputedStyle(tmp).color;
+        document.body.removeChild(tmp);
+        return toHex(comp);
+      }
+
+      // apply theme to :root variables
+      function applyTheme(theme){
+        const root = document.documentElement;
+        if(theme.background) root.style.setProperty('--bg', theme.background);
+        if(theme.foreground) root.style.setProperty('--fg', theme.foreground);
+        if(theme.card) root.style.setProperty('--card', theme.card);
+        if(theme.accent) root.style.setProperty('--accent', theme.accent);
+        if(theme.primary) root.style.setProperty('--primary', theme.primary);
+        if(theme.border) root.style.setProperty('--border', theme.border);
+        if(theme.sidebar) root.style.setProperty('--sidebar', theme.sidebar);
+        updateCssOutput(theme);
+      }
+
+      // build CSS var output
+      function buildCssText(theme){
+        return `:root {
+  --bg: ${theme.background};
+  --fg: ${theme.foreground};
+  --card: ${theme.card};
+  --accent: ${theme.accent};
+  --primary: ${theme.primary};
+  --border: ${theme.border};
+  --sidebar: ${theme.sidebar};
+}`;
+      }
+
+      function updateCssOutput(theme){
+        const cssOutput = document.getElementById('cssOutput');
+        cssOutput.value = buildCssText(theme);
+      }
+
+      // get current theme from inputs
+      function readThemeFromInputs(){
+        const t = {};
+        themeKeys.forEach(k=>{
+          const textInput = document.querySelector(`#${k.key}-hex`);
+          const colorInput = document.querySelector(`#${k.key}`);
+          const val = (textInput.value && textInput.value.trim()) || (colorInput.value && colorInput.value.trim()) || defaultTheme[k.key];
+          t[k.key] = val;
+        });
+        return t;
+      }
+
+      // sync color input <-> text input
+      themeKeys.forEach(k=>{
+        const color = document.querySelector(`#${k.key}`);
+        const text = document.querySelector(`#${k.key}-hex`);
+        color.addEventListener('input', ()=>{
+          text.value = color.value;
+          applyTheme(readThemeFromInputs());
+        });
+        text.addEventListener('change', ()=>{
+          // try normalizing; if it's a color name or hex it will convert
+          try{
+            color.value = toHex(text.value);
+          }catch(e){}
+          applyTheme(readThemeFromInputs());
+        });
+      });
+
+      // utility: generate random pleasant colors (soft saturation)
+      function randomColor(seed){
+        const r = Math.floor(100 + Math.random()*155);
+        const g = Math.floor(70 + Math.random()*140);
+        const b = Math.floor(70 + Math.random()*160);
+        return '#'+ [r,g,b].map(n=>n.toString(16).padStart(2,'0')).join('');
+      }
+
+      // randomize theme
+      document.getElementById('randomBtn').addEventListener('click', ()=>{
+        const t = {
+          background: '#0b0b0f',
+          foreground: '#f7f7f9',
+          card: '#0f1114',
+          accent: randomColor(),
+          primary: randomColor(),
+          border: 'rgba(255,255,255,0.06)',
+          sidebar: '#0d0d11'
+        };
+        setInputsFromTheme(t);
+        applyTheme(t);
+      });
+
+      // reset
+      document.getElementById('resetBtn').addEventListener('click', ()=>{
+        setInputsFromTheme(defaultTheme);
+        applyTheme(defaultTheme);
+      });
+
+      // copy CSS
+      document.getElementById('copyCss').addEventListener('click', async ()=>{
+        const theme = readThemeFromInputs();
+        const css = buildCssText(theme);
+        await navigator.clipboard.writeText(css);
+        flashButton('copyCss','Copied');
+      });
+
+      // copy JSON
+      document.getElementById('copyJson').addEventListener('click', async ()=>{
+        const theme = readThemeFromInputs();
+        const json = JSON.stringify(theme, null, 2);
+        await navigator.clipboard.writeText(json);
+        flashButton('copyJson','Copied');
+      });
+
+      // download JSON
+      document.getElementById('downloadJson').addEventListener('click', ()=>{
+        const theme = readThemeFromInputs();
+        const blob = new Blob([JSON.stringify(theme,null,2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'edy-theme.json';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+
+      // import JSON via button -> file input
+      const fileInput = document.getElementById('fileInput');
+      document.getElementById('importBtn').addEventListener('click', ()=> fileInput.click());
+      fileInput.addEventListener('change', (e)=>{
+        const f = e.target.files[0];
+        if(!f) return;
+        const reader = new FileReader();
+        reader.onload = ()=>{
+          try {
+            const obj = JSON.parse(reader.result);
+            setInputsFromTheme(obj);
+            applyTheme(obj);
+          } catch(err){
+            alert('Invalid theme JSON');
+          }
+        };
+        reader.readAsText(f);
+        fileInput.value = '';
+      });
+
+      // simple button flash helper
+      function flashButton(id, text){
+        const btn = document.getElementById(id);
+        const orig = btn.innerText;
+        btn.innerText = text;
+        setTimeout(()=> btn.innerText = orig, 1200);
+      }
+
+      // initialize
+      setInputsFromTheme(defaultTheme);
+      applyTheme(defaultTheme);
+
+      // update CSS output on any change
+      Array.from(document.querySelectorAll('input')).forEach(inp=>{
+        inp.addEventListener('input', ()=> {
+          updateCssOutput(readThemeFromInputs());
+        });
+      });
+
+      // allow direct JSON paste via keyboard (Ctrl+I)
+      window.addEventListener('keydown', (e)=>{
+        if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='i'){
+          const text = prompt('Paste theme JSON here:');
+          if(!text) return;
+          try{
+            const obj = JSON.parse(text);
+            setInputsFromTheme(obj);
+            applyTheme(obj);
+          }catch(err){
+            alert('Invalid JSON');
+          }
+        }
+      });
+
+    })();
+  </script>
+</body>
+</html>
