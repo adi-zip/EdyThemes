@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Theme Generator</title>
+  <title>Edy Theme Generator</title>
   <style>
     :root {
       --bg: #f5f5f7;
@@ -177,7 +177,7 @@
       </div>
     </div>
 
-    <button id="generate">Generate CSS</button>
+    <button id="randomize">Generate Random Theme</button>
     <button id="copy">Copy to Clipboard</button>
 
     <div id="output" class="output"></div>
@@ -188,7 +188,7 @@
   <script>
     const inputs = document.querySelectorAll('input[type="color"]');
     const output = document.getElementById('output');
-    const generateBtn = document.getElementById('generate');
+    const randomizeBtn = document.getElementById('randomize');
     const copyBtn = document.getElementById('copy');
 
     function generateCSS() {
@@ -206,7 +206,93 @@
       return css;
     }
 
-    generateBtn.addEventListener('click', generateCSS);
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
+    }
+
+    function getLuminance(hex) {
+      const rgb = hexToRgb(hex);
+      const r = rgb.r / 255;
+      const g = rgb.g / 255;
+      const b = rgb.b / 255;
+      return 0.299 * r + 0.587 * g + 0.114 * b;
+    }
+
+    function adjustBrightness(hex, percent) {
+      const rgb = hexToRgb(hex);
+      const factor = 1 + (percent / 100);
+      const r = Math.min(255, Math.round(rgb.r * factor));
+      const g = Math.min(255, Math.round(rgb.g * factor));
+      const b = Math.min(255, Math.round(rgb.b * factor));
+      return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function randomizeTheme() {
+      randomizeBtn.textContent = 'Generating...';
+      randomizeBtn.disabled = true;
+
+      try {
+        const response = await fetch('https://www.colr.org/json/scheme/random');
+        const data = await response.json();
+        
+        if (data.schemes && data.schemes[0] && data.schemes[0].colors) {
+          const colors = data.schemes[0].colors.map(c => '#' + c);
+          const mainColor = colors[0];
+          const accentColor = colors[1] || colors[0];
+          
+          const isDark = Math.random() > 0.5;
+          
+          if (isDark) {
+            document.getElementById('background').value = adjustBrightness(mainColor, -70);
+            document.getElementById('foreground').value = '#f5f5f5';
+            document.getElementById('card').value = adjustBrightness(mainColor, -50);
+            document.getElementById('accent').value = accentColor;
+            document.getElementById('primary').value = colors[2] || accentColor;
+            document.getElementById('border').value = adjustBrightness(mainColor, -40);
+          } else {
+            document.getElementById('background').value = adjustBrightness(mainColor, 80);
+            document.getElementById('foreground').value = '#1a1a1a';
+            document.getElementById('card').value = '#ffffff';
+            document.getElementById('accent').value = accentColor;
+            document.getElementById('primary').value = colors[2] || accentColor;
+            document.getElementById('border').value = adjustBrightness(mainColor, 60);
+          }
+          
+          generateCSS();
+        }
+      } catch (error) {
+        console.error('API failed, using fallback:', error);
+        const fallbackSchemes = [
+          { bg: '#0f172a', fg: '#f8fafc', card: '#1e293b', accent: '#38bdf8', primary: '#0ea5e9', border: '#334155' },
+          { bg: '#18181b', fg: '#fafafa', card: '#27272a', accent: '#a78bfa', primary: '#8b5cf6', border: '#3f3f46' },
+          { bg: '#1a1a1a', fg: '#ffffff', card: '#2d2d2d', accent: '#10b981', primary: '#059669', border: '#404040' },
+          { bg: '#fef3c7', fg: '#1c1917', card: '#ffffff', accent: '#f59e0b', primary: '#d97706', border: '#fde68a' },
+          { bg: '#f0fdf4', fg: '#14532d', card: '#ffffff', accent: '#22c55e', primary: '#16a34a', border: '#bbf7d0' }
+        ];
+        const scheme = fallbackSchemes[Math.floor(Math.random() * fallbackSchemes.length)];
+        document.getElementById('background').value = scheme.bg;
+        document.getElementById('foreground').value = scheme.fg;
+        document.getElementById('card').value = scheme.card;
+        document.getElementById('accent').value = scheme.accent;
+        document.getElementById('primary').value = scheme.primary;
+        document.getElementById('border').value = scheme.border;
+        generateCSS();
+      }
+
+      randomizeBtn.textContent = 'Generate Random Theme';
+      randomizeBtn.disabled = false;
+    }
+
+    inputs.forEach(input => {
+      input.addEventListener('input', generateCSS);
+    });
+
+    randomizeBtn.addEventListener('click', randomizeTheme);
 
     copyBtn.addEventListener('click', () => {
       const css = generateCSS();
